@@ -1,8 +1,3 @@
-// OKAY the goal of this project is to create a simple CLI issue tracker that can be used to manage things via priority... LOW MED HIGH HIGH_PLUS...
-// need to create a CLI to manage them and have a terminal output that will display a sorted list of issues to be tackled... this is a simple app just to get the juices flowing...
-// FOR NOW it'll be in Odin, but rust is a consideration for rewrite
-
-
 package main
 
 import "core:fmt"
@@ -10,6 +5,7 @@ import "core:os"
 import i "issues"
 
 main :: proc() {
+
 	if len(os.args) <= 1 {
 		fmt.println("trackor requires more than one argument")
 		return
@@ -18,19 +14,23 @@ main :: proc() {
 
 	switch args[0] {
 	case "new":
-		if len(args) < 3 {
-			fmt.println("usage: trackor new DESC STATUS PRIORITY")
+		if len(args) < 4 {
+			fmt.println("usage: trackor new DESC PRIORITY STATUS")
 			return
 		}
 		p, pok := i.priority_from_string(args[2])
 		if !pok {
-			fmt.eprintfln("error: invalid priority: {}", p)
+			fmt.eprintfln("error: invalid priority: {}", args[2])
+			return
 		}
 		s, sok := i.status_from_string(args[3])
 		if !sok {
-			fmt.eprintfln("error: invalid status: {}", s)
+			fmt.eprintfln("error: invalid status: {}", args[3])
+			return
 		}
 		i.new_issue(args[1], p, s)
+	case "ls":
+		i.show_issues()
 	case:
 		fmt.println("usage: tracker CMD ARGS...")
 	}
