@@ -7,7 +7,7 @@ import "core:math/rand"
 import "core:os"
 import "core:time"
 
-// get tracker tries to get a .trackor directory from the working directory, if it's not present it makes it
+// get trackor tries to get a .trackor directory from the working directory, if it's not present it makes it
 // NOTE: not sure i want it to do that... if it err's maybe we create seperately but for now it's a 100% it'll get or make it
 get_trackor_dir :: proc() -> string {
 	p, err := os.get_working_directory(context.allocator)
@@ -35,6 +35,7 @@ get_trackor_dir :: proc() -> string {
 
 	return issues_path
 }
+
 
 // generates an id for an issue
 generate_id :: proc() -> string {
@@ -75,7 +76,7 @@ priority_from_string :: proc(s: string) -> (Priority, bool) {
 	case "HIGH":
 		return Priority.HIGH, true
 	case "URGENT":
-		return Priority.HIGH, true
+		return Priority.URGENT, true
 	case:
 		return nil, false
 	}
@@ -87,4 +88,31 @@ truncate_desc :: proc(d: string) -> string {
 	t := fmt.aprintf("{}...", d[:50 - 3])
 
 	return t
+}
+
+get_date :: proc(i: Issue) -> string {
+	return i.id[:min(len(i.id), 8)]
+}
+
+get_id_from_prefix :: proc(p: string) -> (matches: [dynamic]string, ok: bool) {
+	found: [dynamic]string
+	if len(p) > 8 {
+		fmt.eprintfln("error: malformed id length cannot get id, must be at most 8 digits")
+		return found, false
+	}
+
+	for issue in issues {
+		if len(issue.id) != 17 {
+			fmt.eprintfln("error: found issue with malformed id: {}", issue.id)
+			continue
+		}
+		if strings.has_prefix(issue.id[9:], p) do append(&found, issue.id)
+	}
+
+	if len(found) >= 1 {
+		return found, true
+	}
+
+	return found, false
+
 }

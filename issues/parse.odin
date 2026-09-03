@@ -4,16 +4,16 @@ import "core:os"
 import "core:strings"
 
 Priority :: enum {
-	LOW,
+	LOW = 1,
 	MEDIUM,
 	HIGH,
 	URGENT,
 }
 
 Status :: enum {
+	TODO = 1,
 	ACTIVE,
 	DONE,
-	TODO,
 	BLOCKED,
 }
 
@@ -75,7 +75,7 @@ free_paths :: proc() {
 	delete(ipaths)
 }
 
-// Simple destrucor for all of our allocated strings in issues array
+// Simple destructor for all of our allocated strings in issues array
 free_issues :: proc() {
 	for issue in issues {
 		delete(issue.id)
@@ -189,29 +189,4 @@ parse_issues :: proc() {
 			}
 		}
 	}
-}
-
-
-// This function displays the issues into the terminal with formatting
-// NOTE: this will change because there's no sorting and i don't like that it  parses and free's our issues. stopgap solution for testing
-show_issues :: proc() {
-	parse_issues()
-	defer free_issues()
-	fmt.println(
-		"---------------------------------------------------------------------------------------------",
-	)
-	for issue in issues {
-		t := truncate_desc(issue.desc)
-		fmt.printfln(
-			"| {:8v} | {:-6v} | {:-7v} | {:-50v} |",
-			issue.id,
-			issue.priority,
-			issue.status,
-			t,
-		)
-		delete(t)
-	}
-	fmt.println(
-		"---------------------------------------------------------------------------------------------",
-	)
 }
