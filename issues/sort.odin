@@ -87,7 +87,7 @@ filter_status :: proc(status: string) {
 		return
 	}
 
-	if s == .DONE {
+	if s == .CLOSED {
 		sort_issues()
 		show_issues(status = s, hide_done = false)
 	} else {
@@ -110,20 +110,34 @@ show_issues :: proc(status := Status(0), priority := Priority(0), hide_done := t
 			continue
 		}
 
-		if hide_done && issue.status == .DONE {
+		if hide_done && issue.status == .CLOSED {
 			continue
 		}
 
-
-		t := truncate_desc(issue.desc)
-		fmt.printfln(
-			"| {:8v} | {:-6v} | {:-7v} | {:-50v} |",
-			issue.id,
-			issue.priority,
-			issue.status,
-			t,
-		)
-		delete(t)
+		tag := property_to_string(issue.tag)
+		if tag == "" {
+			t := truncate_desc(issue.desc, "")
+			fmt.printfln(
+				"| {:8v} | {:-v} | {:-6v} | {:-50v} |",
+				issue.id,
+				issue.status,
+				issue.priority,
+				t,
+			)
+			delete(t)
+			continue
+		} else {
+			t := truncate_desc(issue.desc, tag)
+			fmt.printfln(
+				"| {:8v} | {:-v} | {:-6v} | {:-50v} |",
+				issue.id,
+				issue.status,
+				issue.priority,
+				t,
+			)
+			delete(t)
+			continue
+		}
 	}
 	fmt.println(
 		"---------------------------------------------------------------------------------------------",
