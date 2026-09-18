@@ -1,20 +1,29 @@
 package issues
+
 import "core:fmt"
 import "core:os"
 import "core:strings"
 
+Status :: enum {
+	OPEN,
+	CLOSED,
+}
+
 Priority :: enum {
+	NULL,
 	LOW = 1,
 	MEDIUM,
 	HIGH,
 	URGENT,
 }
 
-Status :: enum {
-	TODO = 1,
-	ACTIVE,
-	DONE,
-	BLOCKED,
+Tag :: enum {
+	NULL,
+	BUG,
+	REFAC,
+	IDEA,
+	DESIGN,
+	TASK,
 }
 
 Issue :: struct {
@@ -22,6 +31,7 @@ Issue :: struct {
 	desc:     string,
 	priority: Priority,
 	status:   Status,
+	tag:      Tag,
 }
 
 issues: [dynamic]Issue
@@ -84,11 +94,11 @@ free_issues :: proc() {
 	delete(issues)
 }
 
-parse_issues :: proc() {
+parse_data_from_issue :: proc() {
 	// This enum gives us easier stepping through the data in our .md
 	Parts :: enum {
-		TOP,
-		METADATA,
+		OPENER,
+		FRONTMATTER,
 		DESCRIPTION,
 	}
 
@@ -118,8 +128,9 @@ parse_issues :: proc() {
 		desc: string
 		priority: Priority
 		status: Status
+		tag: Tag
 
-		state := Parts.TOP
+		state := Parts.OPENER
 		remaining := content
 		consumed: int
 
@@ -137,13 +148,13 @@ parse_issues :: proc() {
 			trimmed := strings.trim_space(line)
 
 			switch state {
-			case .TOP:
+			case .OPENER:
 				// if there is no --- at the top of the file we need to go to the next file because it isn't a trackor issue
 				if trimmed != "---" do continue file_loop
 				// it is there we go to the next part of the file
-				state = .METADATA
-			case .METADATA:
-				// NOTE: it's worth noting this is a safe parser so it will sill try to parse things out.
+				state = .FRONTMATTER
+			case .FRONTMATTER:
+				// NOTE: it's worth noting this is a safe parser so it will still try to parse things out.
 				// BUT if it's not write the helper util functions error out and print out
 				// if for some change it's close immediately we just fill in the description
 				if trimmed == "---" {
@@ -161,15 +172,19 @@ parse_issues :: proc() {
 					case "id":
 						// NOTE: if there is an id here from the previous iteration we delete it than repopulate it with a cloned string from val
 						id = val
+					case "status":
+						// here we parse out the status from the metadata from the string into the enum
+						if s, ok := status_from_string(val); ok {
+							status = s
+						}
 					case "priority":
 						// here we parse out the priority from the metadata from the string into the enum
 						if p, ok := priority_from_string(val); ok {
 							priority = p
 						}
-					case "status":
-						// here we parse out the status from the metadata from the string into the enum
-						if s, ok := status_from_string(val); ok {
-							status = s
+					case "tag":
+						if t, ok := tag_from_string(val); ok {
+							tag = t
 						}
 					}
 				}
@@ -182,6 +197,7 @@ parse_issues :: proc() {
 					priority = priority,
 					status   = status,
 					desc     = desc,
+					tag      = tag,
 				}
 
 				append(&issues, new)
