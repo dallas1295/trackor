@@ -2,7 +2,6 @@ package main
 
 import "core:fmt"
 import "core:os"
-import "core:strings"
 import i "issues"
 
 main :: proc() {
@@ -16,46 +15,35 @@ main :: proc() {
 
 	switch args[0] {
 	// new creates a new issue with the provided arguments (DESC, PRIORTY, STATUS) it will error out if something goes wrong
-	case "c":
-		if len(args) < 4 {
+	case "new":
+		if len(args) < 4 || len(args) > 5 {
 			usage_new()
 			return
 		}
-		up_p, perr := strings.to_upper(args[2])
-		defer delete(up_p)
-		if perr != nil {
-			fmt.eprintfln("error parsing argument: {}: {}", args[2], perr)
+
+		tag: string
+		if len(args) == 5 do tag = args[4]
+		issue, ok := i.build_issue(args[1], args[2], args[3], tag)
+		if !ok {
+			fmt.eprintfln("error: could not build issue data")
 			return
 		}
-		p, pok := i.priority_from_string(up_p)
-		if !pok {
-			fmt.eprintfln("error: invalid priority: {}", args[2])
+		defer delete(issue.id)
+		defer delete(issue.desc)
+		saved := i.save_issue(issue)
+		if !saved {
+			fmt.eprintfln("error: could not save issue")
 			return
 		}
-		up_s, serr := strings.to_upper(args[3])
-		defer delete(up_s)
-		if serr != nil {
-			fmt.eprintfln("error parsing argument: {}: {}", args[3], serr)
-			return
-		}
-		s, sok := i.status_from_string(up_s)
-		if !sok {
-			fmt.eprintfln("error: invalid status: {}", args[3])
-			return
-		}
-		if !i.save_issue(args[1], p, s) {
-			return
-		}
-	case "now":
-		i.parse_issues()
+
+
+	case "open":
+		i.parse_data_from_issue()
 		defer i.free_issues()
 
-		if len(args) >= 2 && args[1] == "-t" {
+		if len(args) == 1 {
 			i.sort_issues(i.sort_urgency)
-			i.show_issues(status = .TODO)
-		} else if len(args) == 1 {
-			i.sort_issues(i.sort_urgency)
-			i.show_issues(status = .ACTIVE)
+			i.show_issues(status = .OPEN)
 		} else {
 			fmt.println("usage: trackor now [-t]")
 		}
@@ -64,7 +52,7 @@ main :: proc() {
 	/* EDIT COMMANDS */
 	/////////////////////
 	case "e":
-		i.parse_issues()
+		i.parse_data_from_issue()
 		defer i.free_issues()
 		if len(args) < 2 {
 			usage_edit()
@@ -83,12 +71,12 @@ main :: proc() {
 				return
 			}
 			if ok := i.set_priority(args[2], args[3]); !ok do return
-		case "-d":
+		case "-c":
 			if len(args) < 3 {
 				usage_edit()
 				return
 			}
-			if ok := i.set_done(args[2]); !ok do return
+			if ok := i.set_closed(args[2]); !ok do return
 		case:
 			usage_edit()
 			return
@@ -96,7 +84,7 @@ main :: proc() {
 		}
 	// running raw trackor ls will output the issues on a most recent date -> status -> priority matching
 	case "ls":
-		i.parse_issues()
+		i.parse_data_from_issue()
 		defer i.free_issues()
 		if len(args) == 1 {
 			i.sort_issues()
@@ -138,7 +126,7 @@ main :: proc() {
 				i.filter_priority(args[2])
 			// in the case where nothign is in the switch it'll just reiterate how to use
 			case "-fd":
-				i.filter_status("DONE")
+				i.filter_status("CLOSED")
 			case:
 				usage_ls()
 				return
@@ -153,13 +141,13 @@ main :: proc() {
 }
 
 usage_new :: proc() {
-	fmt.println("usage: trackor new DESC PRIORITY STATUS")
+	fmt.println("usage: trackor new DESC STATUS PRIORITY [TAG]")
 }
 
 usage_edit :: proc() {
 	fmt.println("usage: trackor e -s ID STATUS")
 	fmt.println("       trackor e -p ID PRIORITY")
-	fmt.println("       trackor e -d ID")
+	fmt.println("       trackor e -c ID")
 }
 usage_ls :: proc() {
 	fmt.println("usage: trackor ls [-so | -su | -sur | -a | -fd]")
