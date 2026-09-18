@@ -4,14 +4,7 @@ import "core:fmt"
 import "core:strings"
 
 set_status :: proc(id, s: string) -> bool {
-	up, err := strings.to_upper(s)
-	defer delete(up)
-	if err != nil {
-		fmt.eprintfln("error parsing argument: {}: {}", s, err)
-		return false
-	}
-
-	new_status, sok := status_from_string(up)
+	new_status, sok := status_from_string(s)
 	if !sok {
 		fmt.eprintfln("error: invalid status: {}", s)
 		return false
@@ -37,7 +30,9 @@ set_status :: proc(id, s: string) -> bool {
 					fmt.eprintfln("issue #{}: status is current", issue.id)
 					return false
 				}
-				saved := save_issue(issue.desc, issue.priority, new_status, issue.id)
+				new_issue := Issue{issue.id, issue.desc, issue.priority, new_status, issue.tag}
+
+				saved := save_issue(new_issue)
 				if !saved {
 					fmt.eprintfln("error: failed to save issue")
 					return false
@@ -88,7 +83,9 @@ set_priority :: proc(id, p: string) -> bool {
 					fmt.eprintfln("issue #{}: priority is current", issue.id)
 					return false
 				}
-				saved := save_issue(issue.desc, new_priority, issue.status, issue.id)
+				new_issue := Issue{issue.id, issue.desc, new_priority, issue.status, issue.tag}
+
+				saved := save_issue(new_issue)
 				if !saved {
 					fmt.eprintfln("error: failed to save issue")
 					return false
@@ -105,6 +102,6 @@ set_priority :: proc(id, p: string) -> bool {
 	}
 }
 
-set_done :: proc(id: string) -> bool {
-	return set_status(id, "DONE")
+set_closed :: proc(id: string) -> bool {
+	return set_status(id, "CLOSED")
 }
