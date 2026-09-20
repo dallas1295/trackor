@@ -33,8 +33,19 @@ build_issue :: proc(description: string, status, priority, tag: string) -> (Issu
 	}
 
 	id := generate_id()
+	ppath := get_trackor_dir()
+	if len(ppath) == 0 {
+		return issue, false
+	}
+	defer delete(ppath)
+	// create the filename and path
+	fname := fmt.aprintf("{}.md", id)
+	defer delete(fname)
+	// join .trackor/fname
+	fpath := fmt.aprintf("{}/{}", ppath, fname)
+	defer delete(fpath)
 
-	return Issue{id, strings.clone(d), p, s, t}, true
+	return Issue{id, strings.clone(d), p, s, t, fpath}, true
 }
 
 save_issue :: proc(issue: Issue) -> bool {
