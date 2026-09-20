@@ -16,14 +16,22 @@ main :: proc() {
 	switch args[0] {
 	// new creates a new issue with the provided arguments (DESC, PRIORTY, STATUS) it will error out if something goes wrong
 	case "new":
-		if len(args) < 4 || len(args) > 5 {
+		if len(args) < 3 || len(args) > 5 {
 			usage_new()
 			return
 		}
-
+		status: string
 		tag: string
+		if len(args) == 4 {
+			if _, arg3 := i.priority_from_string(args[3]); arg3 {
+				status = args[3]
+			}
+			if _, arg3 := i.tag_from_string(args[3]); arg3 {
+				tag = args[3]
+			}
+		}
 		if len(args) == 5 do tag = args[4]
-		issue, ok := i.build_issue(args[1], args[2], args[3], tag)
+		issue, ok := i.build_issue(args[1], args[2], status, tag)
 		if !ok {
 			fmt.eprintfln("error: could not build issue data")
 			return
@@ -47,6 +55,35 @@ main :: proc() {
 		} else {
 			fmt.println("usage: trackor now [-t]")
 		}
+
+	case "grep":
+		i.parse_data_from_issue()
+		defer i.free_issues()
+		i.sort_issues()
+
+		if len(args) >= 2 {
+			switch args[1] {
+			case "c":
+				i.issues_grep(status = .CLOSED, hide_done = false)
+			case "p":
+				p, ok := i.priority_from_string(args[2])
+				if !ok {
+					fmt.eprintfln("provided priority is not valid")
+					return
+				}
+				i.issues_grep(priority = p)
+			case "t":
+				t, ok := i.tag_from_string(args[2])
+				if !ok {
+					fmt.eprintfln("provided tag is not valid")
+					return
+				}
+				i.issues_grep(tag = t)
+			}
+		} else {
+			i.issues_grep()
+		}
+
 
 	/////////////////////
 	/* EDIT COMMANDS */

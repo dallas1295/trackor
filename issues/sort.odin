@@ -1,6 +1,7 @@
 package issues
 
 import "core:fmt"
+import "core:os"
 import "core:sort"
 import "core:strings"
 
@@ -142,4 +143,46 @@ show_issues :: proc(status := Status(0), priority := Priority(0), hide_done := t
 	fmt.println(
 		"---------------------------------------------------------------------------------------------",
 	)
+}
+
+issues_grep :: proc(
+	status := Status(0),
+	priority := Priority(0),
+	tag := Tag(0),
+	hide_done := true,
+) {
+	// get the current dir so it's relative output
+	cwd, err := os.get_working_directory(context.allocator)
+	defer delete(cwd)
+	if err != nil do return
+
+	for issue in issues {
+		if int(status) != 0 && issue.status != status {
+			continue
+		}
+		if int(priority) != 0 && issue.priority != priority {
+			continue
+		}
+
+		if int(tag) != 0 && issue.tag != tag {
+			continue
+		}
+
+		if hide_done && issue.status == .CLOSED {
+			continue
+		}
+
+
+		p := issue.path
+		if strings.has_prefix(p, cwd) && len(p) > len(cwd) {
+			p = p[len(cwd) + 1:]
+		}
+
+		itag := property_to_string(issue.tag)
+		t := truncate_desc(issue.desc, itag)
+		prio := property_to_string(issue.priority)
+
+		fmt.printfln("{:-v}:{}: {} | {:-6v} | {}", p, 3, issue.status, strings.to_upper(prio), t)
+	}
+	return
 }
