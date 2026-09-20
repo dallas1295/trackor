@@ -30,14 +30,7 @@ set_status :: proc(id, s: string) -> bool {
 					fmt.eprintfln("issue #{}: status is current", issue.id)
 					return false
 				}
-				new_issue := Issue {
-					issue.id,
-					issue.desc,
-					issue.priority,
-					new_status,
-					issue.tag,
-					issue.path,
-				}
+				new_issue := Issue{issue.id, issue.desc, issue.priority, new_status, issue.tag}
 
 				saved := save_issue(new_issue)
 				if !saved {
@@ -90,14 +83,7 @@ set_priority :: proc(id, p: string) -> bool {
 					fmt.eprintfln("issue #{}: priority is current", issue.id)
 					return false
 				}
-				new_issue := Issue {
-					issue.id,
-					issue.desc,
-					new_priority,
-					issue.status,
-					issue.tag,
-					issue.path,
-				}
+				new_issue := Issue{issue.id, issue.desc, new_priority, issue.status, issue.tag}
 
 				saved := save_issue(new_issue)
 				if !saved {
