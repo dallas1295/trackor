@@ -19,7 +19,7 @@ Priority :: enum {
 
 Tag :: enum {
 	NULL,
-	BUG,
+	BUG = 1,
 	REFAC,
 	IDEA,
 	DESIGN,
@@ -32,6 +32,7 @@ Issue :: struct {
 	priority: Priority,
 	status:   Status,
 	tag:      Tag,
+	path:     string,
 }
 
 issues: [dynamic]Issue
@@ -90,6 +91,7 @@ free_issues :: proc() {
 	for issue in issues {
 		delete(issue.id)
 		delete(issue.desc)
+		delete(issue.path)
 	}
 	delete(issues)
 }
@@ -198,6 +200,7 @@ parse_data_from_issue :: proc() {
 					status   = status,
 					desc     = desc,
 					tag      = tag,
+					path     = strings.clone(path),
 				}
 
 				append(&issues, new)
