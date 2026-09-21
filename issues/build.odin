@@ -33,69 +33,48 @@ build_issue :: proc(description: string, status, priority, tag: string) -> (Issu
 	}
 
 	id := generate_id()
+	valid: bool
+	// 5 time loop to generate a valid id
+	for i := 0; i < 5; i += 1 {
+		if validate_id(id) {
+			valid = true
+			break
+		}
+		delete(id)
+		id = generate_id()
+	}
+	if !valid {
+		delete(id)
+		fmt.eprintln("error: could not generate valid id")
+		return issue, false
+	}
+
+
+	// get the trackor directory
 	ppath := get_trackor_dir()
 	if len(ppath) == 0 {
 		return issue, false
 	}
 	defer delete(ppath)
+
 	// create the filename and path
 	fname := fmt.aprintf("{}.md", id)
 	defer delete(fname)
 	// join .trackor/fname
 	fpath := fmt.aprintf("{}/{}", ppath, fname)
-	defer delete(fpath)
+
 
 	return Issue{id, strings.clone(d), p, s, t, fpath}, true
 }
 
 save_issue :: proc(issue: Issue) -> bool {
-	// get our trackor dir or create it if it doesn't exist
-	ppath := get_trackor_dir()
-	defer delete(ppath)
-	if len(ppath) == 0 {
-		fmt.eprintfln("failed to generate trackor issue directory.")
-		return false
-	}
-
-	// get the id
-	id := issue.id
-	// 5 time loop to generate a valid id
-	if !validate_id(id) {
-		found: bool
-		for i := 0; i < 5; i += 1 {
-			gen_id := generate_id()
-			if validate_id(gen_id) {
-				id = gen_id
-				found = true
-				break
-			}
-			delete(gen_id)
-		}
-		// it failed to create an ID that's valid so we fail
-		// NOTE:: this is definitely someehting really wrong if it happens so we need to check.
-		if !found {
-			fmt.eprintln(
-				"error: could not create issue with valid ID after 5 tries, please try again.",
-			)
-			return false
-		}
-	}
-
-	// generate the file name and it's path
-	fname := fmt.aprintf("{}.md", id)
-	defer delete(fname)
-	// join .trackor/fname
-	fpath := fmt.aprintf("{}/{}", ppath, fname)
-	defer delete(fpath)
-
-	// valid path so we can build and break
 	priority := property_to_string(issue.priority)
 	status := property_to_string(issue.status)
 	tag := property_to_string(issue.tag)
 
 	data := fmt.aprintf(
 		"---\nid: {}\nstatus: {}\npriority: {}\ntag: {}\n---\n\n{}",
-		id,
+		issue.id,
 		status,
 		priority,
 		tag,
@@ -103,15 +82,22 @@ save_issue :: proc(issue: Issue) -> bool {
 	)
 	defer delete(data)
 
-	// then when we break the loop we write the file with the generated data.
+	ppath := get_trackor_dir()
+	if len(ppath) == 0 {
+		fmt.eprintln("error: failed to get trackor path")
+		return false
+	}
+	defer delete(ppath)
+
+	fpath := fmt.aprintf("{}/{}.md", ppath, issue.id)
+	defer delete(fpath)
+
 	err := os.write_entire_file(fpath, data)
 	if err != nil {
-		fmt.eprintf("error creating issue\n")
+		fmt.eprintf("error: could not save issue\n")
 		return false
 	}
 
-	// lil' print for the homies to know it's done
-	fmt.printf("issue created\n")
 	return true
 }
 

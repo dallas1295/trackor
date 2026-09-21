@@ -20,31 +20,31 @@ main :: proc() {
 			usage_new()
 			return
 		}
-		status: string
+		priority: string
 		tag: string
 		if len(args) == 4 {
 			if _, arg3 := i.priority_from_string(args[3]); arg3 {
-				status = args[3]
+				priority = args[3]
+			} else {
+				priority = ""
 			}
 			if _, arg3 := i.tag_from_string(args[3]); arg3 {
 				tag = args[3]
+			} else {
+				tag = ""
 			}
 		}
 		if len(args) == 5 do tag = args[4]
-		issue, ok := i.build_issue(args[1], args[2], status, tag)
+		issue, ok := i.build_issue(args[1], args[2], priority, tag)
 		if !ok {
 			fmt.eprintfln("error: could not build issue data")
 			return
 		}
 		defer delete(issue.id)
 		defer delete(issue.desc)
-		saved := i.save_issue(issue)
-		if !saved {
-			fmt.eprintfln("error: could not save issue")
-			return
-		}
-
-
+		defer delete(issue.path)
+		if saved := i.save_issue(issue); !saved do return
+		fmt.println("new issue created")
 	case "open":
 		i.parse_data_from_issue()
 		defer i.free_issues()
