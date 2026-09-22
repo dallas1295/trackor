@@ -183,5 +183,4 @@ get_id_from_prefix :: proc(p: string) -> (matches: [dynamic]string, ok: bool) {
 	}
 
 	return found, false
-
 }
