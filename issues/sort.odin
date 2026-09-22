@@ -182,7 +182,7 @@ issues_grep :: proc(
 		t := truncate_desc(issue.desc, itag)
 		prio := property_to_string(issue.priority)
 
-		fmt.printfln("{:-v}:{}: {} | {:-6v} | {}", p, 3, issue.status, strings.to_upper(prio), t)
+		fmt.printfln("{:-v}:{}:{}:{:-6v}:{}", p, 3, issue.status, strings.to_upper(prio), t)
 	}
 	return
 }
