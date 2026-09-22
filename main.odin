@@ -16,12 +16,21 @@ main :: proc() {
 	switch args[0] {
 	// new creates a new issue with the provided arguments (DESC, PRIORTY, STATUS) it will error out if something goes wrong
 	case "new":
-		if len(args) < 3 || len(args) > 5 {
+		if len(args) < 2 || len(args) > 5 {
 			usage_new()
 			return
 		}
+
+		status: string
 		priority: string
 		tag: string
+
+		if len(args) == 2 {
+			status = "open"
+			tag = ""
+			priority = ""
+		}
+
 		if len(args) == 4 {
 			if _, arg3 := i.priority_from_string(args[3]); arg3 {
 				priority = args[3]
@@ -35,16 +44,30 @@ main :: proc() {
 			}
 		}
 		if len(args) == 5 do tag = args[4]
-		issue, ok := i.build_issue(args[1], args[2], priority, tag)
+
+		issue, ok := i.build_issue(args[1], status, priority, tag)
 		if !ok {
 			fmt.eprintfln("error: could not build issue data")
 			return
 		}
+
 		defer delete(issue.id)
 		defer delete(issue.desc)
 		defer delete(issue.path)
 		if saved := i.save_issue(issue); !saved do return
 		fmt.println("new issue created")
+	case "delete":
+		i.parse_data_from_issue()
+		defer i.free_issues()
+		if len(args) == 2 {
+			if ok := i.delete_issue(args[1]); ok {
+				fmt.printfln("issue deleted")
+			} else {
+				fmt.eprintln("error deleting issue")
+			}
+		} else {
+			usage_delete()
+		}
 	case "open":
 		i.parse_data_from_issue()
 		defer i.free_issues()
@@ -136,9 +159,6 @@ main :: proc() {
 				i.sort_issues(i.sort_oldest)
 				i.show_issues()
 			case "-su":
-				i.sort_issues(i.sort_urgency)
-				i.show_issues()
-			case "-sur":
 				i.sort_issues(i.sort_rev_urgency)
 				i.show_issues()
 			case "-a":
@@ -182,6 +202,7 @@ main :: proc() {
 		}
 	case:
 		usage_new()
+		usage_delete()
 		usage_edit()
 		usage_ls()
 		return
@@ -189,7 +210,7 @@ main :: proc() {
 }
 
 usage_new :: proc() {
-	fmt.println("usage: trackor new DESC STATUS PRIORITY [TAG]")
+	fmt.println("usage: trackor new DESC [STATUS] [PRIORITY] TAG]")
 }
 
 usage_edit :: proc() {
@@ -198,7 +219,14 @@ usage_edit :: proc() {
 	fmt.println("       trackor e -c ID")
 }
 usage_ls :: proc() {
-	fmt.println("usage: trackor ls [-so | -su | -sur | -a | -fd]")
+	fmt.println("usage: trackor grep")
+	fmt.println("")
+	fmt.println("usage: trackor ls [-so | -su | -a | -fd]")
 	fmt.println("       trackor ls -fs STATUS")
 	fmt.println("       trackor ls -fp PRIORITY")
+}
+
+usage_delete :: proc() {
+	fmt.println("usage: trackor delete ID")
+	fmt.println("       delete will find it based on information provided")
 }
