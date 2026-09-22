@@ -103,6 +103,7 @@ show_issues :: proc(status := Status(0), priority := Priority(0), hide_done := t
 	fmt.println(
 		"---------------------------------------------------------------------------------------------",
 	)
+	sort_issues(sort_urgency)
 	for issue in issues {
 		if int(status) != 0 && issue.status != status {
 			continue
@@ -156,6 +157,8 @@ issues_grep :: proc(
 	defer delete(cwd)
 	if err != nil do return
 
+
+	sort_issues(sort_urgency)
 	for issue in issues {
 		if int(status) != 0 && issue.status != status {
 			continue
