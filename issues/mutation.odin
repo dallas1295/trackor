@@ -1,6 +1,8 @@
 package issues
 
 import "core:fmt"
+import "core:os"
+import "core:os/file"
 import "core:strings"
 
 set_status :: proc(id, s: string) -> bool {
@@ -118,4 +120,34 @@ set_priority :: proc(id, p: string) -> bool {
 
 set_closed :: proc(id: string) -> bool {
 	return set_status(id, "CLOSED")
+}
+
+delete_issue :: proc(id: string) -> bool {
+	if len(id) > 8 {
+		fmt.eprintln("error: provided id is too long")
+		return false
+	}
+
+	full, ok := get_id_from_prefix(id)
+	if !ok {
+		fmt.eprintfln("error: could not find valid id with prefix {}", id)
+		return false
+	}
+
+	ppath := get_trackor_dir()
+	if len(ppath) == 0 {
+		fmt.eprintln("error: could not retreive trackor directory")
+		return false
+	}
+	defer delete(ppath)
+	fpath := fmt.aprintf("{}/{}.md", ppath, full)
+	defer delete(fpath)
+	if err := os.remove(fpath); err != nil {
+		fmt.eprintln("error: could not delete issue")
+		return false
+	}
+
+	fmt.printfln("issue: {} delete", full)
+	return true
+
 }
