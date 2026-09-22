@@ -169,6 +169,17 @@ main :: proc() {
 				return
 			}
 		}
+	case "gen":
+		gen_id := i.generate_id()
+		ok := i.validate_id(gen_id)
+		if ok {
+			fmt.printfln("generated filename: {}", gen_id)
+			fmt.println(
+				"Use this as the name of your md file and match the frontmatter to create your own issues.",
+			)
+		} else {
+			fmt.println("error: failed to generate a valid id and filename please try again")
+		}
 	case:
 		usage_new()
 		usage_edit()
