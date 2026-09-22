@@ -127,11 +127,21 @@ delete_issue :: proc(id: string) -> bool {
 		return false
 	}
 
-	full, ok := get_id_from_prefix(id)
+	matches, ok := get_id_from_prefix(id)
 	if !ok {
 		fmt.eprintfln("error: could not find valid id with prefix {}", id)
 		return false
 	}
+	defer delete(matches)
+
+	if len(matches) != 1 {
+		fmt.eprintfln("FOUND MULTIPLE MATCHES:")
+		for match in matches {
+			fmt.eprintfln("{}", match)
+		}
+		return false
+	}
+	full := matches[0]
 
 	ppath := get_trackor_dir()
 	if len(ppath) == 0 {
