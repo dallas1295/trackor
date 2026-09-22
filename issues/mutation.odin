@@ -2,7 +2,6 @@ package issues
 
 import "core:fmt"
 import "core:os"
-import "core:os/file"
 import "core:strings"
 
 set_status :: proc(id, s: string) -> bool {
