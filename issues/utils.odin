@@ -81,8 +81,8 @@ tag_from_string :: proc(s: string) -> (Tag, bool) {
 		return Tag.BUG, true
 	case "REFAC":
 		return Tag.REFAC, true
-	case "TASK":
-		return Tag.TASK, true
+	case "FEAT":
+		return Tag.FEAT, true
 	case "DESIGN":
 		return Tag.DESIGN, true
 	case "IDEA":
@@ -127,8 +127,8 @@ property_to_string :: proc(v: $T) -> string {
 			return "idea"
 		case .DESIGN:
 			return "design"
-		case .TASK:
-			return "task"
+		case .FEAT:
+			return "feat"
 		case .NULL:
 			return ""
 		case:

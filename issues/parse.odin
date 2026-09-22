@@ -23,7 +23,7 @@ Tag :: enum {
 	REFAC,
 	IDEA,
 	DESIGN,
-	TASK,
+	FEAT,
 }
 
 Issue :: struct {
