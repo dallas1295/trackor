@@ -11,7 +11,7 @@ build_issue :: proc(description: string, status, priority, tag: string) -> (Issu
 	// trim description & ensure it's not len 0 cause it can't be empty
 	d := strings.trim_space(description)
 	if len(d) == 0 {
-		fmt.eprintf("cannot have empty description field\n")
+		fmt.eprintf("error: cannot have empty description field\n")
 		return issue, false
 	}
 

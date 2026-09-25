@@ -118,7 +118,7 @@ parse_data_from_issue :: proc() {
 		// get our data in the path and read the file, this allocates so it needs to be freed
 		data, err := os.read_entire_file_from_path(path, context.allocator)
 		if err != nil {
-			fmt.eprintf("error reading path: {}\n", path)
+			fmt.eprintf("error: could not read path: {}\n", path)
 			continue
 		}
 		defer delete(data)

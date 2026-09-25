@@ -13,7 +13,7 @@ set_status :: proc(id, s: string) -> bool {
 
 	matches, ok := get_id_from_prefix(id)
 	if !ok {
-		fmt.eprintfln("failed to retrieve matches")
+		fmt.eprintfln("error: failed to retrieve matches")
 		return false
 	}
 	defer delete(matches)
