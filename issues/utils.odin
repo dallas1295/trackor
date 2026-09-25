@@ -64,6 +64,8 @@ priority_from_string :: proc(s: string) -> (Priority, bool) {
 		return Priority.HIGH, true
 	case "URGENT":
 		return Priority.URGENT, true
+	case "NULL":
+		return Priority.NULL, true
 	case "":
 		return Priority.NULL, true
 	case:
