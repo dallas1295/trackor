@@ -1,6 +1,6 @@
 # trackor
 
-This project was handwritten and researched without the use of AI, with the exception of this README.
+This project was handwritten and researched without the use of AI.
 The idea was to create an issue tracker to be used in my personal projects so i don't need to spam with todo comments and random commenting inline.
 
 Trackor is simple, fast, per-directory issue tracker that lives in your terminal. Issues are plain markdown files — no database, no daemon, no lock-in. If you can `cat` it, you can read your issues.
@@ -12,8 +12,9 @@ Running any trackor command in a directory uses (or creates) a `.trackor/` folde
 ```markdown
 ---
 id: 20260903-45097622
-priority: MEDIUM
-status: ACTIVE
+status: open
+priority: high
+tag: bug
 ---
 
 Fix the login bug
@@ -25,30 +26,35 @@ Fix the login bug
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| `trackor` | List issues (newest first, DONE hidden) |
-| `trackor new DESC PRIORITY STATUS` | Create an issue |
-| `trackor now` | What you're actively working on, most urgent first |
-| `trackor now -t` | Your TODO backlog, most urgent first |
-| `trackor e -s ID STATUS` | Set an issue's status |
-| `trackor e -p ID PRIORITY` | Set an issue's priority |
-| `trackor e -d ID` | Mark an issue DONE |
-| `trackor ls` | Same as bare `trackor` |
-| `trackor ls -so` | Oldest issues first |
-| `trackor ls -su` | Sort by priority (URGENT on top) |
-| `trackor ls -sur` | Sort by priority, reversed |
-| `trackor ls -a` | Show all issues, including DONE |
-| `trackor ls -fd` | Show only DONE issues (the archive) |
-| `trackor ls -fs STATUS` | Filter by status |
-| `trackor ls -fp PRIORITY` | Filter by priority |
+| Command                                      | Description                                                      |
+| -------------------------------------------- | ---------------------------------------------------------------- |
+| `trackor`                                    | List issues (newest first, highest priority, first, DONE hidden) |
+| `trackor new DESC [STATUS] [PRIORITY] [TAG]` | Create an issue                                                  |
+| `trackor now`                                | What you're actively working on, most urgent first               |
+| `trackor delete ID`                          | Delete's an issue from .trackor dir based on the ID provided     |
+| `trackor open`                               | Lists all currently open issues (newest first)                   |
+| `trackor e -s ID STATUS`                     | Set an issue's status                                            |
+| `trackor e -p ID PRIORITY`                   | Set an issue's priority                                          |
+| `trackor e -c ID`                            | Mark an issue CLOSED                                             |
+| `trackor grep`                               | displays issues in a grep compliant way, with paths included     |
+| `trackor grep -c`                            | shows grep output for CLOSED issues                              |
+| `trackor grep -p PRIORITY`                   | shows grep output for issues with the given priority             |
+| `trackor grep -t TAG`                        | shows grep output for issues with the given TAG                  |
+| `trackor ls`                                 | Same as bare `trackor`                                           |
+| `trackor ls -so`                             | Oldest issues first                                              |
+| `trackor ls -su`                             | Sort by priority, reversed                                       |
+| `trackor ls -a`                              | Show all issues, including CLOSED                                |
+| `trackor ls -fd`                             | Show only CLOSED issues (the archive)                            |
+| `trackor ls -fs STATUS`                      | Filter by status                                                 |
+| `trackor ls -fp PRIORITY`                    | Filter by priority                                               |
 
 ### Values
 
-- **Priority:** `LOW`, `MEDIUM`, `HIGH`, `URGENT`
-- **Status:** `TODO`, `ACTIVE`, `DONE`, `BLOCKED`
+- **Priority:** `NULL`,`LOW`, `MEDIUM`, `HIGH`
+- **Status:** `OPEN`, `CLOSED`
+- **Tag:** `NULL`, `BUG`, `REFAC`, `IDEA`, `DESIGN`, `FEAT`
 
-All status and priority arguments are case-insensitive.
+All status, priority, and tag arguments are case-insensitive.
 
 ### ID prefixes
 
@@ -69,8 +75,10 @@ odin build . -o:speed -out:trackor
 ```
 
 ## Additional Comments
+
 trackor issues are saved and commited with PR's for both testing and keeping my own records straight in goals for the project.
-if you'd like to get a peek at why I may add you can look in .trackor for more information.
+
+if there are any additional features in development or ideas feel free to look in the .trackor in the project.
 
 ## License
 
@@ -78,6 +86,6 @@ Copyright (C) 2026 A. Dallas Sherman
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE.md](LICENSE.md) for details.
 
-___
+---
 
-This README was generated using GLM-5.3 however the entire project is handwritten by me personally
+This README was paritall generated using GLM-5.3 however the entire project is handwritten by me personally.
